@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<meta charset='UTF-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<title>Finger Scale</title>
+	<style>
+	body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+	</style>
+</head>
+<body>
+<h1>Current force:</h1>
+<div id='current_force_display', style="font-size:500%">Loading...</div>
+<button onclick="{zeroForce = measuredForce; maxPulled = 0;}">Reset 0</button>
+<h1>Max force:</h1>
+<div id='max_force_display', style="font-size:500%">Loading...</div>
+<button onclick="maxPulled = 0">Reset max</button>
+<br>
+<button onclick="toggleCSVMeasurement()", id="csv_button">Start continuous measurement</button>
+<button onclick="downloadCSV()", id="csv_button">Download csv file</button>
+
+<div id="chart" style="height: 370px; width:100%;"></div>
+<script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+
+
+
+<script>
+
+var measuredForce;
+var zeroForce = 0;
+var maxPulled = 0;
+var pulledForce;
+
+function fetchValue() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+			measuredForce = this.responseText;
+		}
+	};
+	xhttp.open("GET", "/force", true);
+	xhttp.send();
+	pulledForce = Math.abs(zeroForce - measuredForce);	//Absolute value so you can pull both up and down.
+	maxPulled = maxPulled < pulledForce ? pulledForce : maxPulled;
+	document.getElementById("current_force_display").innerHTML = "" + pulledForce + "kg";
+	document.getElementById("max_force_display").innerHTML = "" + maxPulled + "kg";
+}
+setInterval(fetchValue, 1);
+
+var dps = [];
+var isMeasuring = false;
+
+var chart = new CanvasJS.Chart("chart", {
+	title :{
+		text: "Force over time",
+		fontFamily: "Arial"
+	},
+	data: [{
+		type: "line",
+		dataPoints: dps
+	}]
+
+});
+
+function toggleCSVMeasurement(){
+	if(isMeasuring){
+		clearInterval(CSVinterval);
+		document.getElementById("csv_button").innerHTML = "Start continuous measurement";
+	}else{
+		startTime = (new Date()).valueOf();
+		dps.length = 0;
+		CSVinterval = setInterval(
+		function() {
+			dps.push({x: ((new Date()).valueOf() - startTime), y: pulledForce});
+			chart.render();
+			},
+		1);
+		document.getElementById("csv_button").innerHTML = "Stop continuous measurement";
+	}
+	isMeasuring = !isMeasuring
+}
+
+function downloadCSV(){
+	var ms = 0;
+	let csvContent = "data:text/csv;charset=utf-8,"
+		+ dps.map((e) => {return e.x + "," + e.y}).join("\r\n");
+	var encodedUri = encodeURI(csvContent);
+
+	let link = document.createElement("a");
+	link.setAttribute("href", encodedUri);
+	link.setAttribute("download", "data.csv");
+
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+}
+
+</script>
+
+</body>
+</html>
