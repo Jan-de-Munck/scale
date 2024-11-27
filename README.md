@@ -11,10 +11,11 @@ The finger scale is a free and open source finger strength training device. It h
 ## One time set up
 1. Set up `config.h`: Rename [example_config.h](example_config.h) to `config.h` and replace all values. \
 1.5 (OPTIONAL) Set up the ip address of your scale as static ip on your router: If your the administrator of your network you can assign your desired ip to the mac address of your board. This will guarantee that the ip wis never taken.
-2. Install the libraries: Easiest way is to use the [Arduino IDE](https://www.arduino.cc/en/software) to install the libraries.
-3. Calibrate the scale: With the HX711_ADC library comes a calibration example. In the Arduino IDE go to file -> Examples -> HX711_ADC -> Calibration. Upload the code, and follow the instructions printed to serial, Make sure to save to EEPROM.
-4. Upload the filesystem: In the Arduino IDE hit ctrl+shit+p and type "Upload LittleFS to Pico/ESP8266/ESP32" and hit enter.
-5. Upload scale.ino.
+2. Install the ESP8266 Board in the [Arduino IDE](https://www.arduino.cc/en/software): Go to file->preferences->Additional board manager URLs: and paste `https://arduino.esp8266.com/stable/package_esp8266com_index.json`. Then go to tools->Board->Board manager and type `esp8266` and install.
+3. Install the libraries: Easiest way is to use the Arduino IDE to install the libraries.
+4. Calibrate the scale: With the HX711_ADC library comes a calibration example. In the Arduino IDE go to file -> Examples -> HX711_ADC -> Calibration. Upload the code, and follow the instructions printed to serial, Make sure to save to EEPROM.
+5. Upload the filesystem: In the Arduino IDE hit ctrl+shit+p and type "Upload LittleFS to Pico/ESP8266/ESP32" and hit enter.
+6. Upload scale.ino.
 
 ## Usage
 In any browser on a device connected to the same network as your scale go to http://\<the ip you choose\>/ and you should see the webpage defined [here](/data/index.html). Stand on the scale, click 'Reset 0' on the webpage, now the 'Current force' and 'Max force' should both say '0kg'. Start pulling on the fingerboard, 'Current force' will display the current force, and 'Max force' will show the biggest force you have pulled. You can reset the 'Max force' by clicking 'Reset max'. When you click 'Start continuous measurement' it will start showing a graph of force over time, click 'Stop continuous measurement' to stop graphing and 'Download csv file' to download .csv file containing the last continuous measurements. The first column is time in milliseconds, and the second column is force in whichever units you used for calibration. \
